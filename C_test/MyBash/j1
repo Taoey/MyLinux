@@ -1,0 +1,301 @@
+#!/bin/bash
+user=root
+passwd=123456
+
+#学生表添加数据
+stuCre(){
+
+select var in "insert by keyboard" "insert by files" "quit";
+do 
+if [ "$var" == "insert by keyboard" ]
+then
+    echo "Please input the order,name,class,id in order "
+    read _order _name _class _id
+    mysql -u$user -p$passwd -e "
+    use LinuxDatas;
+    insert into XSXXB(XSID,XM,BJ,XH)values('$_order','$_name','$_class','$_id');
+    select * from XSXXB where XH="$_id";
+    quit
+    "
+    echo -e "1.insert by keyboard\n2.insert by files\n3.quit"
+elif [ "$var" == "insert by files" ]
+then
+    while read LINE
+    do
+      XSID=`echo $LINE |cut -d , -f 1`
+      XM=`echo $LINE |cut -d , -f 2`
+      BJ=`echo $LINE |cut -d , -f 3`
+      XH=`echo $LINE |cut -d , -f 4`
+      mysql -u$user -p$passwd -e"
+      use LinuxDatas;
+      insert into XSXXB(XSID,XM,BJ,XH)values('$XSID','$XM','$BJ','$XH');
+      select * from XSXXB where XSID='$XSID';
+      quit"      
+    done  < students  >/dev/null 2>&1
+    echo -e "1.insert by keyboard\n2.insert by files\n3.quit"
+elif [ "$var" == "quit" ]
+then
+    break
+else echo "Please input the right operation number"
+fi
+done
+
+echo "1. Create 2.Delete 3.Update 4.Retrieve 5.ShowAll 6.Quit"
+
+}
+
+#学生表删除数据
+stuDel(){
+echo "please input the student's id:"
+read _id
+mysql -u$user -p$passwd -e "
+use LinuxDatas;
+delete from XSXXB where XH = '$_id';
+select * from XSXXB;
+quit"
+
+echo "1. Create 2.Delete 3.Update 4.Retrieve 5.ShowAll 6.Quit"
+}
+#学生表展示数据
+stuShow(){
+
+mysql -u$user -p$passwd -e "
+use LinuxDatas;
+select * from XSXXB;
+quit
+"
+echo "1. Create 2.Delete 3.Update 4.Retrieve 5.ShowAll 6.Quit"
+}
+#学生表更新数据
+##注意sql中的变量要用单引号
+stuUpd(){
+echo "Please input the student's id:"
+read _oldID
+echo "Please input the new data:name,class,id"
+read _name _class _newID
+mysql -u$user -p$passwd -e"
+use LinuxDatas;
+select * from XSXXB where XH='$_oldID';
+update XSXXB set XM = '$_name', BJ = '$_class',XH = '$_newID' where XH = '$_oldID';
+
+select * from XSXXB where XH='$_newID';
+quit"
+echo "1. Create 2.Delete 3.Update 4.Retrieve 5.ShowAll 6.Quit"
+}
+
+#学生表查询数据
+stuRet(){
+echo "Please select the student's information what you know:"
+select  var in "name" "class" "id" "quit";
+do
+if [ "$var" == "name" ]
+then
+    echo 'Please input the name'
+    read name
+    echo "The student's information is as follows:"
+    mysql -u$user -p$passwd -e "
+    use LinuxDatas;
+    select * from XSXXB where XM='$name';
+    quit
+    "
+    echo "1.name 2.class 3.id 4.quit"
+elif [ "$var" == "class" ]
+then
+    echo 'Please input the class'
+    read class
+    echo "The student's information is as follows:"
+    mysql -u$user -p$passwd -e "
+    use LinuxDatas;
+    select * from XSXXB where BJ='$class';
+    quit
+    "
+    echo "1.name 2.class 3.id 4.quit"
+elif [ "$var" == "id" ]
+then
+    echo 'Please input the id'
+    read id
+    echo "The student's information is as follows:"
+    mysql -u$user -p$passwd -e "
+    use LinuxDatas;
+    select * from XSXXB where XH='$id';
+    quit
+    "
+    echo "1.name 2.class 3.id 4.quit"
+elif [ "$var" == "quit" ]
+then 
+    break
+else
+    echo "Please input the right operation number"
+    echo "1.name 2.class 3.id 4.quit"
+fi
+done
+echo "1. Create 2.Delete 3.Update 4.Retrieve 5.ShowAll 6.Quit"
+}
+
+#题目表
+# id, name, desc, 
+
+#题目表增加数据
+
+queCre(){
+select var in "insert by keyboard" "insert by files" "quit";
+do 
+if [ "$var" == "insert by keyboard" ]
+then
+    read -p "id:"            _id  
+    read -p "path:"          _path 
+    mysql -u$user -p$passwd -e"
+    use LinuxDatas;
+    insert into TMXXB values('$_id','$_path');
+    select * from TMXXB;
+    quit
+    "
+    echo -e "1.insert by keyboard\n2.insert by files\n3.quit"
+elif [ "$var" == "insert by files" ]
+then
+    while read LINE
+    do
+      TMID=`echo $LINE |cut -d , -f 1`
+      TMLJ=`echo $LINE |cut -d , -f 2`
+      mysql -u$user -p$passwd -e"
+      use LinuxDatas;
+      insert into TMXXB values('$TMID','$TMLJ');
+      select * from TMXXB where TMID='$TMID';
+      quit
+      "      
+    done  < questions  >/dev/null 2>&1
+    echo -e "1.insert by keyboard\n2.insert by files\n3.quit"
+elif [ "$var" == "quit" ]
+then
+    break
+else echo "Please input the right operation number"
+fi
+done
+
+echo "1. Create 2.Delete 3.Update 4.Retrieve 5.ShowAll 6.Quit"
+}
+
+
+#题目表删除数据
+queDel(){
+echo "please input the question's id:"
+read _id
+mysql -u$user -p$passwd -e"
+use LinuxDatas;
+select * from TMXXB where TMID ='$_id' ;
+delete from TMXXB where TMID = '$_id';
+quit
+"
+echo "1. Create 2.Delete 3.Update 4.Retrieve 5.ShowAll 6.Quit"
+}
+
+#题目表展示数据
+queShow(){
+mysql -u$user -p$passwd -e"
+use LinuxDatas;
+select * from TMXXB ;
+quit
+"
+echo "1. Create 2.Delete 3.Update 4.Retrieve 5.ShowAll 6.Quit"
+}
+
+#题目修改
+queUpd(){
+echo "Please input the question's id:"
+read _oldID
+read -p "newID:" newID
+read -p "newPath:" newPath
+mysql -u$user -p$passwd -e"
+use LinuxDatas;
+select * from TMXXB where TMID='$_oldID';
+update TMXXB set TMID = '$newID', CCLJ = '$newPath', where TMID = '$_oldID';
+select * from TMXXB where TMID='$newID';
+quit"
+echo "1. Create 2.Delete 3.Update 4.Retrieve 5.ShowAll 6.Quit"
+}
+#题目查询
+queRet(){
+
+echo "Please input the question's id:(if you don't see result ,your id is don't exist)"
+read _id
+mysql -u$user -p$passwd -e"
+use LinuxDatas;
+select * from TMXXB where TMID='$_id';
+quit
+"
+echo "1. Create 2.Delete 3.Update 4.Retrieve 5.ShowAll 6.Quit"
+}
+
+
+
+###############
+
+#主程序
+
+###############
+
+
+echo "What do you want operate ?"
+select var in "students' information" "questions' information" "Quit";
+do
+  if [ "$var" == "students' information" ]
+  then 
+       select stu in "Create" "Delete" "Update" "Retrieve" "showAll" "Quit";
+       do
+	   if [ "$stu" == "Create" ]
+	   then
+               stuCre
+	   elif [ "$stu" == "Delete" ]
+           then
+               stuDel
+	   elif [ "$stu" == "Update" ]  
+	   then
+               stuUpd
+	   elif [ "$stu" == "Retrieve" ]
+	   then
+               stuRet
+	   elif [ "$stu" == "showAll" ]
+	   then
+               stuShow
+	   elif [ "$stu" == "Quit" ]
+	   then
+               echo -e "1.students' information\n2.questions' information\n3.Quit\n"
+               break
+	   else echo "Please input the right operation number"
+	   fi
+	   done 
+  elif [ "$var" == "questions' information" ] 
+  then 
+       select que in "Create" "Delete" "Update" "Retrieve" "showAll" "Quit";
+       do
+           if [ "$que" == "Create" ]
+	   then
+               queCre
+	   elif [ "$que" == "Delete" ]
+           then
+                queDel
+	   elif [ "$que" == "Update" ]  
+	   then
+               queUpd
+	   elif [ "$que" == "Retrieve" ]
+	   then
+               queRet
+
+	   elif [ "$que" == "showAll" ]
+	   then
+               queShow
+	   elif [ "$que" == "Quit" ]
+	   then
+               echo -e "1.students' information\n2.questions' information\n3.Quit\n"
+               break
+	   else echo "Please input the right operation number"
+	   fi
+	   done 
+  elif [ "$var" == "Quit" ]
+  then 
+       break
+  else 
+       echo "Please input the right operation number"
+  fi
+done
+

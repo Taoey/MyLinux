@@ -1,0 +1,306 @@
+#!/bin/bash
+user=root
+passwd=123456
+
+#学生表添加数据
+stuCre(){
+echo "Please input the name,class,id in order "
+read _name _class _id
+mysql -u$user -p$passwd -e "
+use LinuxDatas;
+insert into students("XM","BJ","XH")values("$_name","$_class","$_id");
+select * from students;
+quit
+"
+echo "Your operation is successful"
+}
+
+#学生表删除数据
+stuDel(){
+echo "please input the student's id:"
+read _id
+mysql -u$user -p$passwd -e "
+use LinuxDatas;
+delete from students where XH = '$_id';
+select * from students;
+quit
+"
+echo "Your operation is successful"
+}
+#学生表展示数据
+stuShow(){
+
+mysql -u$user -p$passwd -e "
+use LinuxDatas;
+select * from students;
+quit
+"
+
+}
+#学生表更新数据
+stuUpd(){
+echo "Please input the student's id:"
+read _oldID
+echo "Please input the new data:name,class,id"
+read _name _class _newID
+mysql -u$user -p$passwd -e"
+use LinuxDatas;
+select * from students where XH='$_oldID';
+update students set XM = '$_name', BJ = '$_class',XH = '$_newID' where XH = '$_oldID';
+
+select * from students where XH='$_newID';
+quit
+"
+
+echo "Your operation is successful"
+}
+
+#学生表查询数据
+stuRet(){
+echo "Please select the student's information what you know:"
+select  var in "name" "class" "id" "quit";
+do
+if [ "$var" == "name" ]
+then
+    echo 'Please input the name'
+    read name
+    echo "The student's information is as follows:"
+    mysql -u$user -p$passwd -e "
+    use LinuxDatas;
+    select * from students where XM='$name'
+    "
+    echo "1.name 2.class 3.id 4.quit"
+elif [ "$var" == "class" ]
+then
+    echo 'Please input the class'
+    read class
+    echo "The student's information is as follows:"
+    mysql -u$user -p$passwd -e "
+    use LinuxDatas;
+    select * from students where BJ='$class'
+    quit
+    "
+    echo "1.name 2.class 3.id 4.quit"
+elif [ "$var" == "id" ]
+then
+    echo 'Please input the id'
+    read id
+    echo "The student's information is as follows:"
+    mysql -u$user -p$passwd -e "
+    use LinuxDatas;
+    select * from students where BJ='$id'
+    quit
+    "
+    echo "1.name 2.class 3.id 4.quit"
+elif [ "$var" == "quit" ]
+then 
+    break
+else
+    echo "Please input the right operation number"
+    echo "1.name 2.class 3.id 4.quit"
+fi
+done
+}
+
+#题目表
+# id, name, desc, input1,output1,input2,output2,input3,output3,time,size
+#题目表增加数据
+
+qusCre(){
+select var in "insert by keyboard" "insert by files" "quit";
+do 
+if [ "$var" == "insert by keyboard" ]
+then
+    read -p "id:"            _id  
+    read -p "name:"          _name 
+    read -p "descration:"    _desc
+    read -p "input1:"        _in1
+    read -p "output1:"       _out1
+    read -p "input2:"        _in2 
+    read -p "output2:"       _out2 
+    read -p "input3:"        _in3 
+    read -p "output3:"       _out3 
+    read -p "time:"          _time 
+    read -p "size:"          _size 
+    mysql -u$user -p$passwd -e"
+    use LinuxDatas;
+    insert into questions values("$_id","$_name","$_desc","$_in1","$_out1","$_in2","$_out2","$_in3","$_out3","$_time","$_size");
+    select * from questions;
+    quit
+    "
+    echo "1.insert by keyboard 2.insert by files 3.quit"
+elif [ "$var" == "insert by files" ]
+then
+
+ 
+
+
+    echo "1.insert by keyboard 2.insert by files 3.quit"
+elif [ "$var" == "quit" ]
+then
+    break
+else echo "Please input the right operation number"
+fi
+done
+
+}
+
+
+#题目表删除数据
+queDel(){
+echo "please input the question's id:"
+read _id
+mysql -u$user -p$passwd -e"
+use LinuxDatas;
+select * from questions where id ='$_id' ;
+delete from questions where id = '$_id';
+quit
+"
+}
+
+#题目表展示数据
+queShow(){
+mysql -u$user -p$passwd -e"
+use LinuxDatas;
+select * from questions ;
+quit
+"
+
+}
+
+#题目修改
+queUpd(){
+echo "Please input the question's id:"
+read _oldID
+echo "Please select data which you want to update:"
+select var in "id" "name" "descration" "input1" "output1" "input2" "output2" "input3" "output3" "time" "size" "quit";
+do
+if [ "$var" == "id" ]
+then
+    read -p "id:" _id
+    mysql -u$user -p$passwd -e"
+    use LinuxDatas;
+    select * from questions where "id"='$_oldID';
+    update questions set id = "$_id" where "id"='$_oldID';
+    select * from questions where id = "$_id";
+    quit
+    "
+elif [ "$var" == "name" ]
+then
+    read -p "name:" name
+    mysql -u$user -p$passwd -e"
+    use LinuxDatas;
+    select * from questions where "id"='$_oldID';
+    update questions set name = "$name" where "id"='$_oldID';
+    select * from questions where name = "$name";
+    quit
+    "
+elif [ "$var" == "descration" ]
+then
+    read -p "descration" descration
+    mysql -u$user -p$passwd -e"
+    use LinuxDatas;
+    select * from questions where "id"='$_oldID';
+    update questions set desc = "$descration" where "id"='$_oldID';
+    select * from questions where desc = "$descration";
+    quit
+    "
+elif [ "$var" == "input1" ]
+then
+    read -p "input1" input1
+    mysql -u$user -p$passwd -e"
+    use LinuxDatas;
+    select * from questions where "id"='$_oldID';
+    update questions set input1 = "$input1" where "id"='$_oldID';
+    select * from questions where input1 = "$input1";
+    quit
+    "
+elif [ "$var" == "output1" ]
+then
+    read -p "output1" output1
+    mysql -u$user -p$passwd -e"
+    use LinuxDatas;
+    select * from questions where "id"='$_oldID';
+    update questions set output1 = "$output1" where "id"='$_oldID';
+    select * from questions where output1 = "$output1";
+    quit
+    "
+elif [ "$var" == "input2" ]
+then
+    read -p "input2" input2
+    mysql -u$user -p$passwd -e"
+    use LinuxDatas;
+    select * from questions where "id"='$_oldID';
+    update questions set input2 = "$input2" where "id"='$_oldID';
+    select * from questions where input2 = "$input2";
+    quit
+    "
+elif [ "$var" == "output2" ]
+then
+    read -p "output2" output2
+    mysql -u$user -p$passwd -e"
+    use LinuxDatas;
+    select * from questions where "id"='$_oldID';
+    update questions set output2 = "$output2" where "id"='$_oldID';
+    select * from questions where output2 = "$output2";
+    quit
+    "
+elif [ "$var" == "input3" ]
+then
+    read -p "input3" input3
+    mysql -u$user -p$passwd -e"
+    use LinuxDatas;
+    select * from questions where "id"='$_oldID';
+    update questions set input3 = "$input3" where "id"='$_oldID';
+    select * from questions where input3 = "$input3";
+    quit
+    "
+elif [ "$var" == "output3" ]
+then
+    read -p "output3" output3
+    mysql -u$user -p$passwd -e"
+    use LinuxDatas;
+    select * from questions where "id"='$_oldID';
+    update questions set output3 = "$output3" where "id"='$_oldID';
+    select * from questions where output3 = "$output3";
+    quit
+    "
+elif [ "$var" == "time" ]
+then
+    read -p "time" time
+    mysql -u$user -p$passwd -e"
+    use LinuxDatas;
+    select * from questions where "id"='$_oldID';
+    update questions set time = "$time" where "id"='$_oldID';
+    select * from questions where time = "$time";
+    quit
+    "
+elif [ "$var" == "size" ]
+then
+    read -p "size" size
+    mysql -u$user -p$passwd -e"
+    use LinuxDatas;
+    select * from questions where "id"='$_oldID';
+    update questions set size = "$size" where "id"='$_oldID';
+    select * from questions where size = "$size";
+    quit
+    "
+elif [ "$var" == "quit" ]
+then
+    break
+else echo "Please input the right operation number"
+    
+fi
+done
+}
+#题目查询
+queRet(){
+
+echo "Please input the question's id:(if you don't see result ,your id is don't exist)"
+read _id
+mysql -u$user -p$passwd -e"
+use LinuxDatas;
+select * from questions where "id"='$_id';
+quit
+"
+}

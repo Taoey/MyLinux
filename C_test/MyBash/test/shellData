@@ -1,0 +1,10 @@
+#!/bin/bash
+mysql -uroot -p123456 -e "show databases;
+use LinuxDatas;
+show tables;
+
+(0003,"Toub","201502","0054"),
+(0004,"Alan","201502","0056");
+
+quit
+"

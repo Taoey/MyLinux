@@ -1,0 +1,137 @@
+#!/bin/bash
+
+
+myfile="cxpcxt/cxpc/*.c"    
+mypath="`pwd`/cxpcxt/cxpc/" #程序存放目录
+edpath="`pwd`/cxpcxt/cxed/" #测试过程的程序目录
+TMpath="`pwd`/cxpcxt"
+testpath="`pwd`/cs"         #程序测试目录
+opath=`pwd`                 #shell 目录
+
+
+
+#时间测试
+# arg1=start, arg2=end, format: %s.%N  
+function getTiming() {  
+    start=$1  
+    end=$2  
+     
+    start_s=$(echo $start | cut -d '.' -f 1)  
+    start_ns=$(echo $start | cut -d '.' -f 2)  
+    end_s=$(echo $end | cut -d '.' -f 1)  
+    end_ns=$(echo $end | cut -d '.' -f 2)  
+   
+
+  
+  
+    time=$(( ( 10#$end_s - 10#$start_s ) * 1000 + ( 10#$end_ns / 1000000 - 10#$start_ns / 1000000 ) ))  
+  
+  
+    echo "$time"  
+}  
+
+
+
+
+##########################
+#主程序
+##########################
+while true
+do
+if ls $myfile >/dev/null 2>&1;   #目录下有.c文件
+then
+  echo "runing..."
+  cd $mypath 
+  for filename in `ls`
+  do    
+    TM=`echo $filename | cut -d . -f 2`
+    XS=`echo $filename | cut -d . -f 1`
+    TJSJ=`date +%Y-%m-%d`
+    #复制到测试目录
+    cp $mypath/$filename $testpath/temp.c #-f 强制复制
+    mv $mypath/$filename $edpath
+    #判断文件内存大小
+    tempSize=`du -b $testpath/temp.c | awk '{print $1}'`
+    TMSize=`cat $TMpath/$TM/$TM.cstm | grep size | cut -d : -f 2`
+    if [ $tempSize -gt  $TMSize ]
+    then
+         mysql -uroot -p123456 -e "
+         use LinuxDatas;
+         insert into TJGCB(XSI,TJSJ,TMID,PCJG)values('$XS','$TJSJ','$TM','DXerr');
+         quit
+         " >/dev/null 2>&1                                                          #大小错误
+    else
+    
+    cd $testpath
+    #调用makefile文件编译(未考虑编译失败情况)
+    start=$(date +%s.%N)  
+    make >run 2>&1
+    end=$(date +%s.%N)  
+    #获取运行时间
+    runTime=`getTiming $start $end`
+
+    
+    TMTime=`cat $TMpath/$TM/$TM.cstm | grep time | cut -d : -f 2`
+    if [ $runTime -gt $TMTime ]
+    then
+         mysql -uroot -p123456 -e "
+         use LinuxDatas;
+         insert into TJGCB(XSI,TJSJ,TMID,PCJG)values('$XS','$TJSJ','$TM','SJerr');
+         quit
+         " >/dev/null 2>&1                                                                  #时间错误
+    else
+    #获取errfile文件大小判断是否编译错误
+    size=`du -b errfile | awk '{print $1}'`
+    if [ 0 -eq $size ] 
+    then
+        cd $TMpath/$TM/in
+        for inFile in `ls`
+        do
+        ID=`echo $inFile | cut -d . -f 1`
+        MyOutput=`$testpath/a.out < $inFile`
+        echo $MyOutput > $TMpath/$TM/run        
+        #和.out文件对比
+        diff $TMpath/$TM/run $TMpath/$TM/out/$ID.out   >>$TMpath/$TM/dif       
+        #清空相关文件
+        : >$TMpath/$TM/run
+        done 
+        difSize=`du -b $TMpath/$TM/dif | awk '{print $1}'`
+        if [ ! $difSize -eq 0 ]
+        then
+         mysql -uroot -p123456 -e "
+         use LinuxDatas;
+         insert into TJGCB(XSI,TJSJ,TMID,PCJG)values('$XS','$TJSJ','$TM','YXerr');
+         quit
+         " >/dev/null 2>&1                                                          #运行错误
+        else
+         mysql -uroot -p123456 -e "
+         use LinuxDatas;
+         insert into TJGCB(XSI,TJSJ,TMID,PCJG)values('$XS','$TJSJ','$TM','pass');
+        quit
+        "  >/dev/null 2>&1          
+        fi           
+        #总体对比结束,#清空相关文件        
+        rm "$testpath/a.out" "$testpath/temp.c"  
+        : > $TMpath/$TM/dif      
+    else
+         mysql -uroot -p123456 -e "
+         use LinuxDatas;
+         insert into TJGCB(XSI,TJSJ,TMID,PCJG)values('$XS','$TJSJ','$TM','BYerr');  
+         quit
+         " >run 2>&1                                                             #编译错误
+
+         : >errfile
+    fi
+    fi
+    fi+
+
+  done
+
+else echo "no file"
+fi
+sleep 60
+cd $opath
+break
+
+done
+
