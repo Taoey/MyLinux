@@ -1,4 +1,5 @@
 import json
+import os
 from pymongo import MongoClient
 
 
@@ -17,6 +18,10 @@ if __name__ == '__main__':
             client.close()
             print("The script shutdown")
             break;
+        #use "cl" to clear the Terminal
+        elif word == "cl" :
+            os.system('clear')
+
         else:
             rs=endic.find({"word_name":word},{"_id":0})#Attention: remember reomve "_id" column
             for tmp in rs:
